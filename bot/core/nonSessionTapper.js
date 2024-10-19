@@ -66,15 +66,6 @@ class NonSessionTapper {
     try {
       const data = parser.toJson(this.query_id);
       const platform = this.#get_platform(this.#get_user_agent());
-      if (
-        _.isUndefined(data?.user?.username) ||
-        _.isNull(data?.user?.username)
-      ) {
-        logger.paragraph(
-          `Set username for query id name <la>${this.session_name}</la> before running the bot and \nfollow the below steps after you are done setting the username:\n\n1. Delete the cache folder\n2. Restart the bot`
-        );
-        process.exit(1);
-      }
       const userString = JSON.stringify(data?.user);
       return {
         webAppData: {
@@ -796,6 +787,12 @@ class NonSessionTapper {
                   );
 
                   if (!_.isEmpty(get_task_by_id)) {
+                    if (get_task_by_id?.taskVerificationType == "SecretCode") {
+                      logger.info(
+                        `<ye>[${this.bot_name}]</ye> | ${this.session_name} | Task requires secret code. Skipping task...`
+                      );
+                      continue;
+                    }
                     const task_available_at = moment(
                       get_task_by_id?.verificationAvailableAt
                     ).diff(moment(), "seconds");
